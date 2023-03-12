@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:learn_flutter/data/database.dart';
 import 'package:learn_flutter/util/newNote.dart';
-import 'package:learn_flutter/util/todo_tile.dart';
+import 'package:learn_flutter/util/noteLists.dart';
 import 'package:flutter/services.dart';
 
 
@@ -22,7 +22,8 @@ class _HomePageState extends State<HomePage> {
 
   ToDoDataBase db=ToDoDataBase();
 
-  final _controller=TextEditingController();
+  final title_controller=TextEditingController();
+  final content_controller=TextEditingController();
 
   @override
 
@@ -33,20 +34,22 @@ class _HomePageState extends State<HomePage> {
     }else{
       db.loadData();
     }
+
     super.initState();
   }
 
-  void checkBoxChanged(bool? value,int index){
-      setState(() {
-        db.toDoList[index][1]=!db.toDoList[index][1];
-      });
-      db.updateDataBase();
-  }
+  // void checkBoxChanged(bool? value,int index){
+  //     setState(() {
+  //       db.toDoList[index].isDone=!db.toDoList[index].isDone;
+  //     });
+  //     db.updateDataBase();
+  // }
 
   void saveNewTask(){
     setState(() {
-      db.toDoList.add([_controller.text,false]);
-      _controller.clear();
+      db.toDoList.add([title_controller.text,content_controller.text,1]);
+      title_controller.clear();
+      content_controller.clear();
     });
     db.updateDataBase();
     Navigator.of(context).pop();
@@ -54,7 +57,8 @@ class _HomePageState extends State<HomePage> {
 
   void handleOnCancel(){
     setState(() {
-      _controller.clear();
+      title_controller.clear();
+      content_controller.clear();
     });
     Navigator.of(context).pop();
     }
@@ -65,7 +69,8 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(
         builder: (context){
         return newNote(
-          controller: _controller ,
+          title_controller: title_controller ,
+          content_controller: content_controller,
           onSave: saveNewTask,
           onCancel: handleOnCancel,
         );
@@ -81,8 +86,10 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
@@ -107,16 +114,17 @@ class _HomePageState extends State<HomePage> {
       body: Container( 
         margin: EdgeInsets.only(top: 0),
         child: ListView.builder(
-        itemCount: db.toDoList.length,
-        itemBuilder: (context, index) {
-            return ToDoTile(
-              taskName: db.toDoList[index][0],
-              taskCompleted: db.toDoList[index][1],
-              onChanged: (value)=>checkBoxChanged(value,index),
+          itemCount: db.toDoList.length,
+          itemBuilder: (context, index) {
+            return noteLists(
+              title: db.toDoList[index][0],
+              content: db.toDoList[index][1],
+              // taskCompleted: db.toDoList[index].isDone,
+              // onChanged: (value)=>checkBoxChanged(value,index),
               deleteFunction: (context)=>deleteTask(index),
             );
-        },
-      ), 
+            },
+        ), 
       ),
     );
   }

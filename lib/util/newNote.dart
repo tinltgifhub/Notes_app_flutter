@@ -4,13 +4,14 @@ import 'package:flutter/services.dart';
 
 
 class newNote extends StatelessWidget {
-  final controller;
+  final title_controller,content_controller;
   VoidCallback onSave;
   VoidCallback onCancel;
 
   newNote({
     super.key,
-    required this.controller,
+    required this.title_controller,
+    required this.content_controller,
     required this.onSave,
     required this.onCancel,
     });
@@ -41,12 +42,22 @@ class newNote extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
-                flex: 1,
+                flex: 12,
                 child: Container(
-                  color: Colors.green,
+                  // color: Colors.green,
+                  margin: EdgeInsets.symmetric(vertical: screenHeight*0.01,horizontal: screenWidth*0.03),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.blue,
+                      width: 2.3,
+                      ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Flexible(
                     child: TextField(
+                      controller: title_controller,
                       textAlign: TextAlign.center,
+                      autofocus: true,
                       style: TextStyle(                  
                         fontSize: 25,
                         fontWeight: FontWeight.w700,
@@ -64,12 +75,20 @@ class newNote extends StatelessWidget {
               ),
 
               Expanded(
-                flex: 8,
+                flex: 78,
                 child:Container(
-                  color: Colors.lightBlue,
+                  margin: EdgeInsets.symmetric(vertical: screenHeight*0.01,horizontal: screenWidth*0.03),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.blue,
+                      width: 2.3,
+                      ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  // color: Colors.lightBlue,
                   child:Flexible(
                     child: TextField(
-                      controller: controller,
+                      controller: content_controller,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       decoration: InputDecoration(
@@ -84,12 +103,13 @@ class newNote extends StatelessWidget {
 
 
               Expanded(
-                flex: 1,
+                flex: 10,
                 child: Container(
-                  color: Colors.red,
+                  // color: Colors.red,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // IconButton(onPressed: () => {}, icon: Icon(Icons.add)),
                       MyButton(
                         text: "Save", 
                         onPressed: onSave),
