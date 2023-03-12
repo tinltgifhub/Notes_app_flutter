@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:learn_flutter/data/database.dart';
-import 'package:learn_flutter/util/newtask.dart';
+import 'package:learn_flutter/util/newNote.dart';
 import 'package:learn_flutter/util/todo_tile.dart';
 import 'package:flutter/services.dart';
 
@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder: (context){
-        return newTask(
+        return newNote(
           controller: _controller ,
           onSave: saveNewTask,
           onCancel: handleOnCancel,
