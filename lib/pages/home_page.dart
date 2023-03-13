@@ -45,12 +45,19 @@ class _HomePageState extends State<HomePage> {
   //     db.updateDataBase();
   // }
 
-  void saveNewTask(){
+  void saveNewNote(){
     setState(() {
       db.toDoList.add([title_controller.text,content_controller.text,1]);
       title_controller.clear();
       content_controller.clear();
     });
+    db.updateDataBase();
+    Navigator.of(context).pop();
+  }
+
+  void saveNote(int index){
+    db.toDoList[index][0]=title_controller.text;
+    db.toDoList[index][1]=content_controller.text;
     db.updateDataBase();
     Navigator.of(context).pop();
   }
@@ -63,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop();
     }
 
-  void createNewTask(){
+  void createNewNote(){
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -71,18 +78,37 @@ class _HomePageState extends State<HomePage> {
         return newNote(
           title_controller: title_controller ,
           content_controller: content_controller,
-          onSave: saveNewTask,
+          onSave: saveNewNote,
           onCancel: handleOnCancel,
         );
       }
     ));
   }
 
-  void deleteTask(int index){
+  void deleteNote(int index){
     setState(() {
       db.toDoList.removeAt(index);
     });
     db.updateDataBase();
+  }
+
+  void openNote(int index){
+    setState(() {
+      title_controller.text=db.toDoList[index][0];
+      content_controller.text=db.toDoList[index][1];
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context){
+        return newNote(
+          title_controller: title_controller ,
+          content_controller: content_controller,
+          onSave:()=>saveNote(index),
+          onCancel: handleOnCancel,
+        );
+      }
+    ));
   }
 
 
@@ -107,7 +133,7 @@ class _HomePageState extends State<HomePage> {
         ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed:createNewTask,
+        onPressed:createNewNote,
         child: Icon(Icons.add),
         ),
 
@@ -121,7 +147,8 @@ class _HomePageState extends State<HomePage> {
               content: db.toDoList[index][1],
               // taskCompleted: db.toDoList[index].isDone,
               // onChanged: (value)=>checkBoxChanged(value,index),
-              deleteFunction: (context)=>deleteTask(index),
+              deleteFunction: (context)=>deleteNote(index),
+              openNote: (context)=>openNote(index),
             );
             },
         ), 

@@ -15,11 +15,13 @@ class newNote extends StatelessWidget {
     required this.onSave,
     required this.onCancel,
     });
-
+  int size=10;
   @override
   Widget build(BuildContext context) {
+    
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
 
     return Scaffold(
       // appBar: AppBar(
@@ -33,6 +35,7 @@ class newNote extends StatelessWidget {
       behavior: HitTestBehavior.translucent,
       onTap:() {
         FocusScope.of(context).unfocus();
+        size=10;
       },
       child: 
         Container(
@@ -42,7 +45,7 @@ class newNote extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
-                flex: 12,
+                flex: size,
                 child: Container(
                   // color: Colors.green,
                   margin: EdgeInsets.symmetric(vertical: screenHeight*0.01,horizontal: screenWidth*0.03),
@@ -54,10 +57,12 @@ class newNote extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Flexible(
-                    child: TextField(
+                    child: TextFormField(
+                      onTap: () => {size=15},
                       controller: title_controller,
                       textAlign: TextAlign.center,
-                      autofocus: true,
+                      textAlignVertical: TextAlignVertical.center,
+                      // autofocus: true,
                       style: TextStyle(                  
                         fontSize: 25,
                         fontWeight: FontWeight.w700,
@@ -75,9 +80,12 @@ class newNote extends StatelessWidget {
               ),
 
               Expanded(
-                flex: 78,
+                flex: 70,
                 child:Container(
-                  margin: EdgeInsets.symmetric(vertical: screenHeight*0.01,horizontal: screenWidth*0.03),
+                  margin: EdgeInsets.only(
+                    left: screenWidth*0.03,
+                    right: screenWidth*0.03,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.blue,
@@ -87,8 +95,10 @@ class newNote extends StatelessWidget {
                   ),
                   // color: Colors.lightBlue,
                   child:Flexible(
-                    child: TextField(
+                    child: TextFormField( 
+                      onTap: () => {size=15},
                       controller: content_controller,
+                      // autofocus: true,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       decoration: InputDecoration(
@@ -106,16 +116,33 @@ class newNote extends StatelessWidget {
                 flex: 10,
                 child: Container(
                   // color: Colors.red,
+                  padding: EdgeInsets.only(
+                    bottom: screenHeight*0.01,
+                    left:screenWidth*0.03,
+                    right: screenWidth*0.03,
+                    top: screenHeight*0.003,
+                    ),
+                  // color: Colors.red,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // IconButton(onPressed: () => {}, icon: Icon(Icons.add)),
-                      MyButton(
-                        text: "Save", 
-                        onPressed: onSave),
-                      MyButton(
-                        text: "Cancel", 
-                        onPressed: onCancel),
+                      ElevatedButton(
+                        onPressed: onSave,
+                        child: Icon(Icons.check,color: Colors.black,),
+                        // backgroundColor: Colors.blue,
+                      ),
+                      SizedBox(width: screenWidth*0.01,),
+                      ElevatedButton(
+                        onPressed: onCancel, 
+                        child: Text('x',style: TextStyle(fontSize: 25,color: Colors.black,fontWeight: FontWeight.w400),),
+                        // backgroundColor: Colors.blue,
+                      ),
+                      // MyButton(
+                      //   text: "Save", 
+                      //   onPressed: onSave),
+                      // MyButton(
+                      //   text: "Cancel", 
+                      //   onPressed: onCancel),
                     ],
                   ),
                 ),

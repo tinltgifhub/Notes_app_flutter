@@ -4,9 +4,11 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 class noteLists extends StatelessWidget {
   final String title;
   final String content;
+  Function(BuildContext)?openNote;
   // final bool taskCompleted;
   // Function(bool?)?onChanged;
   Function(BuildContext)?deleteFunction;
+  bool isSelected;
 
   noteLists({super.key,
     required this.title,
@@ -14,7 +16,16 @@ class noteLists extends StatelessWidget {
     // required this.taskCompleted,
     // required this.onChanged,
     required this.deleteFunction,
+    required this.openNote,
+    this.isSelected=false,
     });
+
+  void _handleTap(BuildContext context) {
+    if (openNote != null) {
+      openNote!(context);
+      isSelected=true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,51 +41,56 @@ class noteLists extends StatelessWidget {
             SlidableAction(
               onPressed: deleteFunction,
               icon: Icons.delete,
-              backgroundColor: Colors.red.shade300,
+              backgroundColor: Colors.red,
               borderRadius: BorderRadius.circular(12),
                 ),
               ],
             ),
-         
-      child: Container(
-        padding: EdgeInsets.all(0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color:Colors.blue,
-            width: 2.3,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ), 
-        child:Column(          
-          
-          children:[ 
-            // Checkbox(
-            //   value: taskCompleted, 
-            //   onChanged: onChanged,
-            //   activeColor: Colors.black38,
-            //   ),
-            ListTile(
-              title:Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: false
-                  ? Colors.black38:Colors.black,
-                ),
-              ),
-              subtitle: Text(
-                content,
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 15,
-                  color: false
-                  ? Colors.black38:Colors.black,
-                ),
-                maxLines: 4,
-                ),
+      child: GestureDetector(
+        onTap:()=>_handleTap(context),
+        behavior: HitTestBehavior.translucent,
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 500),
+          // color: isSelected?Colors.white:Colors.blue,
+          padding: EdgeInsets.all(0),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:Colors.blue,
+              width: 2.3,
             ),
-          ],
+            borderRadius: BorderRadius.circular(12),
+          ), 
+          child:Column(          
+            
+            children:[ 
+              // Checkbox(
+              //   value: taskCompleted, 
+              //   onChanged: onChanged,
+              //   activeColor: Colors.black38,
+              //   ),
+              ListTile(
+                title:Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: false
+                    ? Colors.black38:Colors.black,
+                  ),
+                ),
+                subtitle: Text(
+                  content,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
+                    color: false
+                    ? Colors.black38:Colors.black,
+                  ),
+                  maxLines: 4,
+                  ),
+              ),
+            ],
+          ),
         ),
       ),
       ),
