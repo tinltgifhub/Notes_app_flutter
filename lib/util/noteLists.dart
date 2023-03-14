@@ -33,7 +33,10 @@ class noteLists extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 15,right: 15,top: 20),
+      padding: EdgeInsets.only(
+        left: screenWidth*0.04,
+        right: screenWidth*0.04,
+        bottom: screenHeight*0.015),
       child: Slidable(
         endActionPane: ActionPane(
           motion: StretchMotion(), 
@@ -50,8 +53,7 @@ class noteLists extends StatelessWidget {
         onTap:()=>_handleTap(context),
         behavior: HitTestBehavior.translucent,
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 500),
-          // color: isSelected?Colors.white:Colors.blue,
+          duration: Duration(milliseconds: 300),
           padding: EdgeInsets.all(0),
           decoration: BoxDecoration(
             border: Border.all(
