@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:learn_flutter/util/linktext.dart';
 import 'package:learn_flutter/util/my_button.dart';
 import 'package:flutter/services.dart';
+
 
 
 class newNote extends StatelessWidget {
@@ -17,6 +19,7 @@ class newNote extends StatelessWidget {
     });
   int size=10;
   @override
+
   Widget build(BuildContext context) {
     
     double screenWidth = MediaQuery.of(context).size.width;
@@ -79,6 +82,11 @@ class newNote extends StatelessWidget {
                 ),
               ),
 
+              // Expanded(
+              //   flex:70,
+              //   child: linktext(text: content_controller.text,)
+              // ),
+
               Expanded(
                 flex: 70,
                 child:Container(
@@ -110,7 +118,6 @@ class newNote extends StatelessWidget {
                   ),
                 ),
               ),
-
 
               Expanded(
                 flex: 10,

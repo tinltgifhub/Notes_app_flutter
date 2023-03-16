@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 // 2 type
 // 3 id 
 // 4 time
+// 5 isEdit
+// 6 isSelect
 
 class HomePage extends StatefulWidget {
   
@@ -30,7 +32,8 @@ class _HomePageState extends State<HomePage> {
   final content_controller=TextEditingController();
   final search_text=TextEditingController();
   int searchbox_size=5;
-  // List filterList=[];
+  List <String> List_selected=[];
+  bool isSelectMode=false;
   bool sort_by=true;
 
   @override
@@ -46,22 +49,17 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-  // void checkBoxChanged(bool? value,int index){
-  //     setState(() {
-  //       db.toDoList[index].isDone=!db.toDoList[index].isDone;
-  //     });
-  //     db.updateDataBase();
-  // }
 
   void saveNewNote(){
     setState(() {
       String id=DateTime.now().toString().trim();
       id=id.replaceAll(new RegExp(r'[-:,. ]'), '');
-      db.toDoList.add([title_controller.text,content_controller.text,1,id,DateTime.now()]);
+      db.toDoList.add([title_controller.text,content_controller.text,1,id,DateTime.now(),false,false]);
       title_controller.clear();
       content_controller.clear();
     });
     db.updateDataBase();
+    sort_list();
     Navigator.of(context).pop();
   }
 
@@ -71,9 +69,12 @@ class _HomePageState extends State<HomePage> {
       {
         element[0]=title_controller.text;
         element[1]=content_controller.text;
+        element[4]=DateTime.now();
+        element[5]=true;
       }
     });
     db.updateDataBase();
+    sort_list();
     Navigator.of(context).pop();
   }
 
@@ -82,6 +83,7 @@ class _HomePageState extends State<HomePage> {
       title_controller.clear();
       content_controller.clear();
     });
+    // print(db.toDoList);
     Navigator.of(context).pop();
     }
 
@@ -110,6 +112,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void openNote(String id){
+    if(isSelectMode){
+      setState(() {
+        if(List_selected.contains(id))
+          List_selected.remove(id);
+        else List_selected.add(id);
+        db.toDoList.forEach((element) {
+          if(element[3]==id){
+            element[6]=!element[6];
+          }
+        });
+      });
+      return;
+    }
     setState(() {
       var temp=db.toDoList.firstWhere((element) => element[3]==id);
       title_controller.text=temp[0];
@@ -131,14 +146,13 @@ class _HomePageState extends State<HomePage> {
 
   void sort_list(){
     setState(() {
-      sort_by=!sort_by;
       if(sort_by){
         db.toDoList.sort((a,b)=>a[4].compareTo(b[4]));
-        db.updateDataBase();
+        // db.updateDataBase();
       }
       else{
         db.toDoList.sort((a,b)=>b[4].compareTo(a[4]));
-        db.updateDataBase();
+        // db.updateDataBase();
       }
     });
   }
@@ -155,6 +169,29 @@ class _HomePageState extends State<HomePage> {
         element[0].toLowerCase().contains(text.toLowerCase())||
         element[1].toLowerCase().contains(text.toLowerCase())
       ).toList();
+    });
+  }
+
+  void handleLove(String id){
+    setState(() {
+      db.toDoList.forEach((element) {
+        if(element[3]==id){
+          element[2]==0?element[2]=1:element[2]=0;
+        }
+      });
+    });
+    db.updateDataBase();
+  }
+
+  void handleSelect(String id){
+    setState(() {
+      isSelectMode=true;
+      List_selected.add(id);
+      db.toDoList.forEach((element) {
+        if(element[3]==id){
+          element[6]=true;
+        }
+      });
     });
   }
   
@@ -190,6 +227,9 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           search_text.clear();
           db.loadData();
+          isSelectMode=false;
+          List_selected.clear();
+          db.toDoList.forEach((element) {element[6]=false;});
         });
         searchbox_size=5;
       },
@@ -256,7 +296,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text("Sort by time | ",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w700),),
                     GestureDetector(
-                      onTap:sort_list,
+                      onTap:(){
+                        setState(() {
+                          sort_by=!sort_by;
+                        });
+                        sort_list();
+                      },
                       child:Text(sort_by?'Earliest':'Latest',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w700),),
                     ),
                   ],
@@ -274,12 +319,13 @@ class _HomePageState extends State<HomePage> {
                   itemCount: db.toDoList.length,
                   itemBuilder: (context, index) {
                     return noteLists(
-                      title: db.toDoList[index][0],
-                      content: db.toDoList[index][1].toString(),
-                      // taskCompleted: db.toDoList[index].isDone,
-                      // onChanged: (value)=>checkBoxChanged(value,index),
+                      item: db.toDoList[index],
+                      query: search_text.text,
                       deleteFunction: (context)=>deleteNote(db.toDoList[index][3]),
-                      openNote: (context)=>openNote(db.toDoList[index][3]),
+                      openNote: ()=>openNote(db.toDoList[index][3]),
+                      onLove: ()=>handleLove(db.toDoList[index][3]),
+                      selectNote: ()=>handleSelect(db.toDoList[index][3]),
+                      isSelect: isSelectMode,
                     );
                   },
                 ),
