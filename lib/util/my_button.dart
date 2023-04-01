@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
 
-class MyButton extends StatelessWidget {
-  final String text;
-  VoidCallback onPressed;
+class CircleButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final Icon icon;
 
-  MyButton({
-    super.key,
-    required this.text,
+  const CircleButton({
+    Key? key,
     required this.onPressed,
-    });
+    required this.icon,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
-      onPressed: onPressed,
-      color: Theme.of(context).primaryColor,
-      child: Text(text),
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.blue,
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [icon],
+        ),
+        style: ElevatedButton.styleFrom(
+          shape: CircleBorder(),
+        ),
+      ),
     );
   }
 }

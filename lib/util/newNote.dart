@@ -17,7 +17,7 @@ class newNote extends StatelessWidget {
     required this.onSave,
     required this.onCancel,
     });
-  int size=10;
+  int size=15;
   @override
 
   Widget build(BuildContext context) {
@@ -63,6 +63,7 @@ class newNote extends StatelessWidget {
                     child: TextFormField(
                       onTap: () => {size=15},
                       controller: title_controller,
+                      autofocus: true,
                       textAlign: TextAlign.center,
                       textAlignVertical: TextAlignVertical.center,
                       // autofocus: true,

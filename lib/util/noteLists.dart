@@ -56,7 +56,8 @@ class noteLists extends StatelessWidget {
 
     return spans;
   }
-  
+
+  bool isSlide=false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,7 @@ class noteLists extends StatelessWidget {
           left: screenWidth*0.04,
           right: screenWidth*0.04,
           bottom: screenHeight*0.015),
-        child: Slidable(
+          child: Slidable(
           endActionPane: ActionPane(
             motion: StretchMotion(), 
             children:[
@@ -97,20 +98,44 @@ class noteLists extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(12),
               ), 
-              child:Column(               
+              child:Column(     
                 children:[ 
                   ListTile(
-                    title:RichText(
-                      text:TextSpan(
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 23,
-                          color: Colors.black,
-                          // backgroundColor: Colors.red,
+                    title:
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [ RichText(
+                        text:TextSpan(
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 23,
+                            color: Colors.black,
+                            // backgroundColor: Colors.red,
+                          ),
+                          children: highlightOccurrences(item[0], query),
                         ),
-                        children: highlightOccurrences(item[0], query),
+                        maxLines: 2,
                       ),
-                      maxLines: 2,
+                      !isSelect? IconButton(
+                          icon: Icon(
+                            item[2]==0?Icons.favorite:Icons.favorite_border,
+                            color: Color.fromARGB(255, 255, 107, 156),
+                            fill: 0.5,
+                          ),
+                          splashColor:  Color.fromARGB(255, 255, 107, 156),
+                          onPressed:onLove,
+                        )
+                        :
+                        IconButton(
+                          icon: Icon(
+                            item[6]?Icons.check_box_outlined:Icons.check_box_outline_blank,
+                            color: Colors.blue,
+                            fill: 0.5,
+                          ),
+                          splashColor:  Color.fromARGB(255, 60, 180, 255),
+                          onPressed:(){},
+                        ),
+                      ],
                     ),
                     subtitle: RichText(
                       text:TextSpan(
@@ -147,33 +172,6 @@ class noteLists extends StatelessWidget {
         ),
       ),
 
-      !isSelect? Positioned(
-        top: 0,
-        right: screenWidth*0.04,
-        child: IconButton(
-          icon: Icon(
-            item[2]==0?Icons.favorite:Icons.favorite_border,
-            color: Color.fromARGB(255, 255, 107, 156),
-            fill: 0.5,
-          ),
-          splashColor:  Color.fromARGB(255, 255, 107, 156),
-          onPressed:onLove,
-        ),
-      )
-      :
-      Positioned(
-        top: 0,
-        right: screenWidth*0.04,
-        child: IconButton(
-          icon: Icon(
-            item[6]?Icons.check_box_outlined:Icons.check_box_outline_blank,
-            color: Colors.blue,
-            fill: 0.5,
-          ),
-          splashColor:  Color.fromARGB(255, 60, 180, 255),
-          onPressed:(){},
-        ),
-      ),
     ],
   );
 }

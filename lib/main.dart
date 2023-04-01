@@ -8,6 +8,7 @@ void main() async {
   await Hive.initFlutter();
 
   var box=await Hive.openBox('mybox'); 
+  var trash_box=await Hive.openBox('trashBox');
 
   // SystemChrome.setEnabledSystemUIOverlays([]);
   runApp(const MyApp());

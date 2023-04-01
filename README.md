@@ -1,6 +1,6 @@
-# NoteApp_flutter
+# learn_flutter
 
-A NoteApp built with Flutter framework 
+A new Flutter project.
 
 ## Getting Started
 

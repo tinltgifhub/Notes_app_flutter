@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:learn_flutter/data/database.dart';
+import 'package:learn_flutter/pages/recycle_bin.dart';
+import 'package:learn_flutter/util/my_button.dart';
 import 'package:learn_flutter/util/newNote.dart';
 import 'package:learn_flutter/util/noteLists.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:learn_flutter/util/popupitems.dart';
+import 'recycle_bin.dart';
+
 
 // 0 title
 // 1 content 
@@ -25,6 +30,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   final _mybox=Hive.box('mybox');
+  final _trashBox=Hive.box('trashBox');
 
   ToDoDataBase db=ToDoDataBase();
 
@@ -35,12 +41,15 @@ class _HomePageState extends State<HomePage> {
   List <String> List_selected=[];
   bool isSelectMode=false;
   bool sort_by=true;
+  List <dynamic> Note_List=[];
+
 
   @override
 
   void initState() {
     // TODO: implement initState
-    if(_mybox.get('TODOLIST')==null){
+
+    if(_mybox.get('TODOLIST')==null&&_trashBox.get('TRASHLIST')==null){
       db.createInitialData();
     }else{
       db.loadData();
@@ -64,15 +73,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void saveNote(String id){
-    db.toDoList.forEach((element) {
-      if(element[3]==id)
-      {
-        element[0]=title_controller.text;
-        element[1]=content_controller.text;
-        element[4]=DateTime.now();
-        element[5]=true;
-      }
-    });
+    var targetElement = db.toDoList.firstWhere((element) => element[3] == id, orElse: () => null);
+    targetElement[0] = title_controller.text;
+    targetElement[1] = content_controller.text;
+    targetElement[4] = DateTime.now();
+    targetElement[5] = true;
     db.updateDataBase();
     sort_list();
     Navigator.of(context).pop();
@@ -104,11 +109,14 @@ class _HomePageState extends State<HomePage> {
 
   void deleteNote(String id){
     setState(() {
-      // int idx=db.toDoList.indexWhere((element) => element[3]==id);
-      // db.toDoList.removeAt(idx);
-      db.toDoList.removeWhere((element) => element[3]==id);
+      var removedItem = db.toDoList.firstWhere((element) => element[3] == id);  
+      db.toDoList.remove(removedItem);
+      db.trashList.add(removedItem);
+      Note_List.remove(removedItem);
     });
     db.updateDataBase();
+    db.updateTrashDataBase();
+    print(db.trashList);
   }
 
   void openNote(String id){
@@ -117,11 +125,8 @@ class _HomePageState extends State<HomePage> {
         if(List_selected.contains(id))
           List_selected.remove(id);
         else List_selected.add(id);
-        db.toDoList.forEach((element) {
-          if(element[3]==id){
-            element[6]=!element[6];
-          }
-        });
+        var targetElement = db.toDoList.firstWhere((element) => element[3]==id);
+        targetElement[6] = !targetElement[6];
       });
       return;
     }
@@ -148,24 +153,23 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       if(sort_by){
         db.toDoList.sort((a,b)=>a[4].compareTo(b[4]));
-        // db.updateDataBase();
       }
       else{
         db.toDoList.sort((a,b)=>b[4].compareTo(a[4]));
-        // db.updateDataBase();
       }
     });
+    Note_List=List.from(db.toDoList);
   }
   
-  void handle_search(String text){
+  void handle_search(String text){ 
     text=text.trim();
     setState(() {
       if(text.length==0)
       {
-        db.loadData();
+        Note_List=List.from(db.toDoList);
         return;
       }
-      db.toDoList=db.toDoList.where((element) =>
+      Note_List=db.toDoList.where((element) =>
         element[0].toLowerCase().contains(text.toLowerCase())||
         element[1].toLowerCase().contains(text.toLowerCase())
       ).toList();
@@ -174,59 +178,74 @@ class _HomePageState extends State<HomePage> {
 
   void handleLove(String id){
     setState(() {
-      db.toDoList.forEach((element) {
-        if(element[3]==id){
-          element[2]==0?element[2]=1:element[2]=0;
-        }
-      });
+      var a=db.toDoList.firstWhere((element) => element[3] == id);
+      a[2]==1?a[2]=0:a[2]=1;
     });
     db.updateDataBase();
   }
 
   void handleSelect(String id){
+    if(search_text.text.length>0)
+      return;
     setState(() {
       isSelectMode=true;
       List_selected.add(id);
-      db.toDoList.forEach((element) {
-        if(element[3]==id){
-          element[6]=true;
-        }
-      });
+      db.toDoList.firstWhere((element) => element[3]==id)[6]=true;
     });
   }
-  
+
+  void deleteMultiItems(){
+    setState(() {
+      List<dynamic> removedItems =db.toDoList.where((element) => List_selected.contains(element[3])).toList();
+      db.toDoList.removeWhere((element) => List_selected.contains(element[3]));
+      db.trashList.addAll(removedItems);    
+      db.updateDataBase();
+      db.updateTrashDataBase();
+      Note_List.removeWhere((element) => List_selected.contains(element[3]));
+    });
+  }
+
+
+  void handleFavorite(int vl){
+    setState(() {
+      if(vl==0){
+        Note_List=Note_List.where((element) => element[2]==vl).toList();
+      }else{
+        sort_list();
+      }
+      
+    });
+  }
+
+  void handleRecycleBin() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => RecycleBin()),
+  );
+}
+
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      // appBar: AppBar(
-      //   title: Text('TO DO',
-      //     style: TextStyle(
-      //       color: Colors.blue,
-      //       fontSize: 35,
-      //       fontWeight: FontWeight.w800,
-      //     ),
-      //   ),
-      //   toolbarHeight: 70,
-      //   centerTitle: true,
-      //   elevation: 0,
-      //   backgroundColor: Colors.transparent,
-      //   ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: !isSelectMode?
+      FloatingActionButton(
         onPressed:createNewNote,
         child: Icon(Icons.add),
-        ),
+        ):null,
 
       body:GestureDetector( 
         behavior: HitTestBehavior.translucent,
       onTap:() {
         FocusScope.of(context).unfocus();
         setState(() {
-          search_text.clear();
-          db.loadData();
+          if(search_text.text.length>0){
+            search_text.clear();
+            Note_List=db.toDoList;
+          };
           isSelectMode=false;
           List_selected.clear();
           db.toDoList.forEach((element) {element[6]=false;});
@@ -235,13 +254,15 @@ class _HomePageState extends State<HomePage> {
       },
         child: Container( 
         margin: EdgeInsets.only(top: screenHeight*0.03),
-        child:Column(
+        child: Column(
           children:[
             Expanded(
-              flex: 5,
+              flex: 6,
               child: Container(
+                margin: EdgeInsets.only(left: screenWidth*0.05,right: screenWidth*0.03),
                 // color: Colors.red,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children:[
                     Text(
                       "HELLO TINLT",
@@ -249,6 +270,35 @@ class _HomePageState extends State<HomePage> {
                         fontSize: 20,
                         fontWeight: FontWeight.w500
                       ),
+                    ),
+                    PopupMenuButton(
+                      onSelected: (value)=>{if(value==3) handleRecycleBin()},
+                      icon: Icon(Icons.add_circle_outline,size: 35,color: Colors.blue,),
+                      itemBuilder:(context)=>[
+                        PopupMenuItem(
+                          onTap:()=>handleFavorite(1),
+                          child: PopupItemss(
+                            text: "Notes",
+                            ic: Icons.mode_edit,
+                          ),
+                          value: 1,
+                        ),
+                        PopupMenuItem(
+                          // onTap:()=>handleFavorite(0),
+                          child: PopupItemss(
+                            text: "Favorite",
+                            ic: Icons.favorite,
+                          ),
+                          value: 2,
+                        ),
+                        PopupMenuItem(
+                          child: PopupItemss(
+                            text: "Recycle Bin",
+                            ic: Icons.delete,
+                          ),
+                          value: 3,
+                        ),
+                      ]
                     ),
                   ],                
                 ),
@@ -289,8 +339,9 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               flex: 5,
               child: Container(
-                // color: Colors.red,
-                margin: EdgeInsets.symmetric(horizontal: screenWidth*0.08),
+                // color: isSelectMode?Colors.black12:Colors.transparent,
+                padding: EdgeInsets.symmetric(horizontal: screenWidth*0.08),
+                // margin: EdgeInsets.symmetric(horizontal: screenWidth*0.08),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -310,26 +361,62 @@ class _HomePageState extends State<HomePage> {
             ), 
 
             Expanded(
-              flex: 70,
-              child:Container(
-                // color: Colors.amber,
-                child:
-                ListView.builder(
-                  padding: EdgeInsets.only(top: screenHeight*0.01),
-                  itemCount: db.toDoList.length,
-                  itemBuilder: (context, index) {
-                    return noteLists(
-                      item: db.toDoList[index],
-                      query: search_text.text,
-                      deleteFunction: (context)=>deleteNote(db.toDoList[index][3]),
-                      openNote: ()=>openNote(db.toDoList[index][3]),
-                      onLove: ()=>handleLove(db.toDoList[index][3]),
-                      selectNote: ()=>handleSelect(db.toDoList[index][3]),
-                      isSelect: isSelectMode,
-                    );
-                  },
-                ),
-              ),
+              flex: 68,
+              child: Stack(
+                children:[
+                  Container(
+                    color: isSelectMode?Colors.black12:Colors.transparent,
+                    child:
+                    ListView.builder(
+                      padding: EdgeInsets.only(top: screenHeight*0.01),
+                      itemCount: Note_List.length,
+                      itemBuilder: (context, index) {
+                        return noteLists(
+                          item: Note_List[index],
+                          query: search_text.text,
+                          deleteFunction: (context)=>deleteNote(Note_List[index][3]),
+                          openNote: ()=>openNote(Note_List[index][3]),
+                          onLove: ()=>handleLove(Note_List[index][3]),
+                          selectNote: ()=>handleSelect(Note_List[index][3]),
+                          isSelect: isSelectMode,
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    bottom: screenWidth*0.02,
+                    left: screenWidth*0.04,
+                    right: screenWidth*0.04,
+                    top: screenWidth*1.4,
+                    child:isSelectMode?
+                    Container(
+                      decoration: BoxDecoration(
+                        // color: Colors.red,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ElevatedButton(
+                            onPressed: deleteMultiItems, 
+                            child: Icon(
+                              Icons.delete,
+                              size: 25,
+                              ),
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all(Size(20, 50)),
+                              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    :
+                    Container(),
+                  ),
+            ],),
             ),
           ], 
         ),
