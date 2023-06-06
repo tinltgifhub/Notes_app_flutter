@@ -76,13 +76,18 @@ class _RecycleBinState extends State<RecycleBin> {
               child: Container(
                 margin: EdgeInsets.only(top: screenHeight*0.02),
                 // color: Colors.green,
-                child: Text(
-                  'Recycle Bin',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(onPressed: (){ Navigator.of(context).pop();}, icon: Icon(Icons.arrow_back)),
+                    Text(
+                      '           Recycle Bin',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      ),
+                ],)
               ),
             ),
             Expanded(

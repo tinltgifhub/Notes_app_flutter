@@ -284,7 +284,7 @@ class _HomePageState extends State<HomePage> {
                           value: 1,
                         ),
                         PopupMenuItem(
-                          // onTap:()=>handleFavorite(0),
+                          onTap:()=>handleFavorite(0),
                           child: PopupItemss(
                             text: "Favorite",
                             ic: Icons.favorite,
